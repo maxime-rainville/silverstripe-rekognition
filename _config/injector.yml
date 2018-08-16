@@ -1,0 +1,12 @@
+SilverStripe\Core\Injector\Injector:
+  Aws\Credentials\CredentialsInterface:
+    class: Aws\Credentials\Credentials
+    constructor:
+      key: '`AWS_ACCESS_KEY_ID`'
+      secret: '`AWS_SECRET_ACCESS_KEY`'
+  Aws\S3\S3Client:
+    constructor:
+      configuration:
+        region: '`AWS_REGION`'
+        version: latest
+        credentials: '%$Aws\Credentials\CredentialsInterface'
