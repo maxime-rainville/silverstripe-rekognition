@@ -1,0 +1,14 @@
+{
+    "name": "maxime-rainville/silverstripe-rekognition",
+    "description": "Integration between AWS Rekognition and SilverStripe.",
+    "type": "silverstripe-vendormodule",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Maxime Rainville",
+            "email": "maxime@silverstripe.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}
