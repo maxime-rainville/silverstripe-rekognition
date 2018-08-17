@@ -1,0 +1,50 @@
+service: SilverstripeRekognition
+
+provider:
+  name: aws
+  runtime: nodejs6.10
+  region: ap-southeast-2
+
+# you can add statements to the Lambda function's IAM Role here
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "s3:PutObjectTagging"
+        - "s3:GetObject"
+        - "s3:ListBucket"
+        - "s3:GetObjectMetadata"
+        - "s3:GetObjectTagging"
+      Resource: "arn:aws:s3:::silverstripe-rekognition/*"
+    - Effect: "Allow"
+      Action:
+        - "rekognition:CompareFaces"
+        - "rekognition:DetectFaces"
+        - "rekognition:DetectLabels"
+        - "rekognition:ListCollections"
+        - "rekognition:ListFaces"
+        - "rekognition:SearchFaces"
+        - "rekognition:SearchFacesByImage"
+      Resource: "*"
+#        Fn::Join:
+#          - ""
+#          - - "arn:aws:s3:::"
+#            - "Ref" : "ServerlessDeploymentBucket"
+#            - "/*"
+
+
+# you can add packaging information here
+#package:
+#  include:
+#    - include-me.js
+#    - include-me-dir/**
+#  exclude:
+#    - exclude-me.js
+#    - exclude-me-dir/**
+
+functions:
+  hello:
+    handler: dist/handler.hello
+    events:
+      - s3:
+          bucket: silverstripe-rekognition
+          event: s3:ObjectCreated:*
