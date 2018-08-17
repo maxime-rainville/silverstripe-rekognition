@@ -10,12 +10,12 @@ use SilverStripe\Dev\BuildTask;
 use Aws\S3\S3Client;
 use Aws\S3\Exception\S3Exception;
 
-class QueueFile extends BuildTask implements CronTask
+class RetrieveTag extends BuildTask implements CronTask
 {
 
-    protected $title = 'Queue files to be process by recognition.';
+    protected $title = 'Retrieve Tags from an S3 file';
 
-    protected $description = 'Send files to an S3 bucket to be process by Rekognition.';
+    protected $description = 'Fetch the tags from an S3 file and delete it.';
 
     /**
      * Cron Schedule expression
@@ -30,7 +30,7 @@ class QueueFile extends BuildTask implements CronTask
      * @config
      * @var string
      */
-    private static $segment = 'QueueFileForRekognition';
+    private static $segment = 'RetrieveRekognitionTag';
 
     /**
      * run this task every 5 minutes
@@ -52,21 +52,34 @@ class QueueFile extends BuildTask implements CronTask
         $bucket = $this->getBucketArn();
 
         try {
-            $images = Image::get()->filter('RekognitionState', 'ToQueue');
+            $images = Image::get()->filter('RekognitionState', 'Queued');
             foreach ($images as $img) {
-                if ($img->getMimeType() == 'image/gif') {
-                    $img->RekognitionState = 'Done';
-                } else {
-                    echo "Uploading " . $img->FileName . "\n";
-                    $client->putObject(array(
-                        'Bucket' => $bucket,
-                        'Key' =>  $img->ID,
-                        'Body' => $img->File->getStream()
-                    ));
-                    $img->RekognitionState = 'Queued';
+                $tags = $client->getObjectTagging([
+                    'Bucket' => $bucket,
+                    'Key' =>  $img->ID
+                ])->get('TagSet');
+
+                if (empty($tags)) {
+                    continue;
                 }
 
-                $img->write();
+                foreach ($tags as $tag) {
+                    if ($tag['Key'] == 'RekognitionLabels') {
+                        echo $tag['Value'] . "\n";
+
+                        $img->Tags = $tag['Value'];
+                        $img->RekognitionState = 'Done';
+                        $img->write();
+
+                        $client->deleteObject([
+                            'Bucket' => $bucket,
+                            'Key' =>  $img->ID
+                        ]);
+                        break;
+                    }
+                }
+
+
             }
 
 

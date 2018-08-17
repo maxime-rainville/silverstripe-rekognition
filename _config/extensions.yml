@@ -1,4 +1,4 @@
 
-SilverStripe\Assets\Image:
+SilverStripe\Assets\File:
   extensions:
     - MaximeRainville\SilverstripeRekognition\Extensions\Image
