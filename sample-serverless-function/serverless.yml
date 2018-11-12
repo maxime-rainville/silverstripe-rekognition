@@ -1,11 +1,12 @@
 service: SilverstripeRekognition
 
+custom:
+  # update this to your own unique bucket name
+  bucket: "silverstripe-rekognition"
 provider:
   name: aws
   runtime: nodejs6.10
   region: ap-southeast-2
-
-# you can add statements to the Lambda function's IAM Role here
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -14,7 +15,12 @@ provider:
         - "s3:ListBucket"
         - "s3:GetObjectMetadata"
         - "s3:GetObjectTagging"
-      Resource: "arn:aws:s3:::silverstripe-rekognition/*"
+      Resource:
+        Fn::Join:
+        - ""
+        - - "arn:aws:s3:::"
+          - ${self:custom.bucket}
+          - "/*"
     - Effect: "Allow"
       Action:
         - "rekognition:CompareFaces"
@@ -25,26 +31,11 @@ provider:
         - "rekognition:SearchFaces"
         - "rekognition:SearchFacesByImage"
       Resource: "*"
-#        Fn::Join:
-#          - ""
-#          - - "arn:aws:s3:::"
-#            - "Ref" : "ServerlessDeploymentBucket"
-#            - "/*"
-
-
-# you can add packaging information here
-#package:
-#  include:
-#    - include-me.js
-#    - include-me-dir/**
-#  exclude:
-#    - exclude-me.js
-#    - exclude-me-dir/**
 
 functions:
   hello:
     handler: dist/handler.hello
     events:
       - s3:
-          bucket: silverstripe-rekognition
+          bucket: ${self:custom.bucket}
           event: s3:ObjectCreated:*

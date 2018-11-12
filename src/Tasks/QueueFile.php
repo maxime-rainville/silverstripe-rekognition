@@ -49,7 +49,7 @@ class QueueFile extends BuildTask implements CronTask
     public function process()
     {
         $client = $this->getS3Client();
-        $bucket = $this->getBucketArn();
+        $bucket = $this->getBucketName();
 
         try {
             $images = Image::get()->filter('RekognitionState', 'ToQueue');
@@ -85,15 +85,15 @@ class QueueFile extends BuildTask implements CronTask
     }
 
     /**
-     * Retrieve the ARN of the bucket where images should be put for processing.
+     * Retrieve the name of the bucket where images should be put for processing.
      * @return string
      */
-    protected function getBucketArn()
+    protected function getBucketName()
     {
         $arn = Environment::getEnv('AWS_REKOGNITION_BUCKET_NAME');
         if (!$arn) {
             throw new \LogicException(
-                '`AWS_REKOGNITION_BUCKET_NAME` must be define in your environment to use SilverstripeRekognition'
+                '`AWS_REKOGNITION_BUCKET_NAME` must be defined in your environment to use SilverstripeRekognition'
             );
         }
 
